@@ -15,6 +15,7 @@
   --tick:90ms;
   color-scheme:dark;
 }
+*,*::before,*::after{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--sky);color:var(--ink);font-family:var(--body);font-size:15px;overflow:hidden;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0;
@@ -37,7 +38,7 @@ button:focus-visible{outline:2px solid var(--led);outline-offset:3px}
 .tag{max-width:38ch;text-align:center;color:var(--muted);line-height:1.5;margin:0;text-wrap:balance}
 
 /* Select */
-.screen.select{justify-content:flex-start;overflow-y:auto;padding-top:56px;gap:14px}
+.screen.select{justify-content:flex-start;overflow-y:auto;overflow-x:hidden;padding-top:56px;gap:14px}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:min(100%,760px)}
 .tab{background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted)}
 .tab[aria-selected="true"]{background:var(--led);border-color:var(--led);color:var(--sky);font-weight:600}
@@ -61,7 +62,7 @@ button:focus-visible{outline:2px solid var(--led);outline-offset:3px}
 .overview i.blk{background:color-mix(in srgb,var(--led) 55%,var(--line))}
 .overview i.sel{background:var(--led)}
 .overview i.done{box-shadow:inset 0 2px 0 var(--good)}
-.pager{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.pager{display:flex;align-items:center;gap:12px;max-width:100%;font-family:var(--mono);font-size:13px;color:var(--muted)}
 .pager .btn{padding:4px 14px;font-size:18px;line-height:1}
 .count{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.08em}
 .select h2{font-family:var(--display);font-size:clamp(24px,5vw,36px);margin:0;font-weight:400}
@@ -79,6 +80,7 @@ button:focus-visible{outline:2px solid var(--led);outline-offset:3px}
 .towerinfo .best{font-family:var(--mono);color:var(--good)}
 
 /* Brick yard */
+.pager span{min-width:0;text-align:center}
 .yard{width:min(100%,760px);display:grid;grid-template-columns:auto 1fr auto;gap:10px 18px;align-items:center;background:var(--sky-2);border:1px solid var(--line);border-radius:6px;padding:12px 16px}
 .wallet{display:flex;gap:18px;font-family:var(--mono);font-size:18px;font-variant-numeric:tabular-nums}
 .wallet .coin{color:var(--window)} .wallet .brick{color:var(--target)}
@@ -87,7 +89,9 @@ button:focus-visible{outline:2px solid var(--led);outline-offset:3px}
 .bar{height:8px;border-radius:4px;background:var(--sky);border:1px solid var(--line);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--target)}
 .prog p{margin:4px 0 0;font-size:12px;color:var(--muted)}
-.yard .row{flex-wrap:nowrap}
+.yard .row{flex-wrap:wrap}
+.yard,.bank,.detail,.nameform,.tabs,.tlist,.skyline,.overview,.mapwrap,.streetwrap{max-width:100%}
+.detail h3,.prog p,.card p,.card h3{overflow-wrap:anywhere}
 .yard .btn{padding:9px 14px;font-size:12px}
 .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
 .tower.own .shaft{border-color:var(--window);background:repeating-linear-gradient(0deg,transparent 0 5px,var(--sky-2) 5px 6px),repeating-linear-gradient(90deg,var(--sky-2) 0 4px,color-mix(in srgb,var(--window) 55%,var(--sky-2)) 4px 8px)}
@@ -158,12 +162,13 @@ button:focus-visible{outline:2px solid var(--led);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.cam.walking{animation:none}}
 
 /* Views, map, street view, bank */
-.views{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:none}
-.vtab{background:transparent;border:0;padding:7px 14px;font-size:13px;color:var(--muted)}
+.views{display:flex;max-width:100%;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:none}
+.vtab{flex:1 1 auto;min-width:0;background:transparent;border:0;padding:7px 14px;font-size:13px;color:var(--muted);white-space:nowrap}
+@media (max-width:400px){.vtab{padding:7px 9px;font-size:12px}}
 .vtab+.vtab{border-left:1px solid var(--line)}
 .vtab[aria-selected="true"]{background:var(--sky-2);color:var(--led);font-weight:600}
 .mapwrap,.streetwrap{width:min(100%,760px);flex:none;display:flex;flex-direction:column;gap:6px}
-.mapscroll{overflow:auto;max-height:min(58vh,520px);border:1px solid var(--line);border-radius:6px;overscroll-behavior:contain;background:#2a3356}
+.mapscroll{overflow-x:hidden;overflow-y:auto;max-height:min(58vh,520px);border:1px solid var(--line);border-radius:6px;overscroll-behavior:contain;background:#2a3356}
 .mapscroll canvas{display:block;touch-action:pan-x pan-y}
 .streetwrap canvas{display:block;width:100%;border:1px solid var(--line);border-radius:6px;touch-action:pan-y;cursor:grab}
 .maplegend{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--mono);font-size:11px;color:var(--muted)}
@@ -807,7 +812,7 @@ let viewMode = 'skyline', hoverId = null, mapHits = [], streetHits = [], mapFoll
 try { const v = JSON.parse(localStorage.getItem('citystop-view')); if (v && v.m) viewMode = v.m; } catch(e){}
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-function cityGrid(n, W){ const nb = Math.max(1, Math.ceil(n/PAGE)), cols = Math.min(W < 600 ? 2 : 4, nb); return {nb, cols, rows: Math.ceil(nb/cols)}; }
+function cityGrid(n, W){ const nb = Math.max(1, Math.ceil(n/PAGE)), cols = Math.min(W < 640 ? 2 : 4, nb); return {nb, cols, rows: Math.ceil(nb/cols)}; }
 const roads = () => CITY_ROADS[districtName(district)] || CITY_ROADS.Downtown;
 const mainStreet = () => roads().main;
 const crossStreet = k => { const l = roads().st; return l[k % l.length] + ' Street' + (k >= l.length ? ' ' + (Math.floor(k / l.length) + 1) : ''); };
@@ -833,7 +838,7 @@ function tag(c, x, y, lines, W, minTop = 4){
 function drawMap(){
   const sc = $('mapScroll'), cv = $('mapCv'), all = districtList(district), Wv = sc.clientWidth, {nb, cols, rows} = cityGrid(all.length, Wv);
   const R = .75, worldW = cols*4 + (cols+1)*R, worldH = rows*4 + (rows+1)*R;
-  const s = Math.max(Wv / worldW, 40), W = Math.round(worldW * s), H = Math.round(worldH * s), c = sizeCanvas(cv, W, H);
+  const s = Wv / worldW, W = Math.floor(worldW * s), H = Math.round(worldH * s), c = sizeCanvas(cv, W, H);
   const omax = Math.max(...all.map(b => b.storeys)), selIdx = all.findIndex(b => b.id === selId);
   c.fillStyle = '#2a3356'; c.fillRect(0, 0, W, H);
   c.strokeStyle = '#59628a'; c.setLineDash([s*.25, s*.25]); c.lineWidth = 1;
