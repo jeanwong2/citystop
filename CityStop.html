@@ -7,7 +7,7 @@
 /* Layout: one-screen night city. Elevator floor reel in the centre, HUD pinned to the corners, skyline canvas behind. Single dark look by choice. */
 :root{
   --sky:#0a0f1f; --sky-2:#151d38; --ink:#e7ebf6; --muted:#8b94b6; --line:#27315a;
-  --led:#ffb347; --led-dim:#5e4220; --target:#ff6170; --window:#f4cf78; --good:#78dfa6;
+  --led:#ffb347; --led-dim:#a67b40; --target:#ff6170; --window:#f4cf78; --good:#78dfa6;
   --display:"Bungee", "Impact", system-ui, sans-serif;
   --body:"Chakra Petch", system-ui, sans-serif;
   --mono:"Share Tech Mono", ui-monospace, "Courier New", monospace;
@@ -16,6 +16,9 @@
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
+/* no double-tap zoom anywhere in the game (pinch zoom still works for people who need it) */
+*{touch-action:manipulation}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{height:100%}
 body{background:var(--sky);color:var(--ink);font-family:var(--body);font-size:15px;overflow:hidden;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0;
@@ -44,7 +47,8 @@ button:focus-visible{outline:2px solid var(--led);outline-offset:3px}
 .tab[aria-selected="true"]{background:var(--led);border-color:var(--led);color:var(--sky);font-weight:600}
 .tab .x2{font-family:var(--mono);font-size:10px;margin-left:6px;padding:1px 5px;border-radius:999px;background:var(--window);color:var(--sky);font-weight:600}
 .x2t{color:var(--window)}
-.tab .ct{font-family:var(--mono);font-size:11px;margin-left:5px;opacity:.75}
+.ac-plate{background:rgba(10,15,31,.82)!important;box-shadow:0 0 0 3px rgba(10,15,31,.82);border-radius:3px;text-shadow:none}
+.tab .ct{font-family:var(--mono);font-size:11px;margin-left:5px}
 .tower[aria-pressed="true"] .shaft{border-color:var(--led);transform:translateY(-4px);box-shadow:0 -6px 18px color-mix(in srgb,var(--led) 30%,transparent)}
 .detail{width:min(100%,760px);display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:12px 16px;background:var(--sky)}
 .detail h3{font-family:var(--display);font-weight:400;font-size:clamp(18px,4vw,24px);margin:0;line-height:1.1;min-width:0}
@@ -53,7 +57,7 @@ button:focus-visible{outline:2px solid var(--led);outline-offset:3px}
 .detail .meta .best{color:var(--good)}
 .detail .acts{grid-column:2;grid-row:1 / span 2;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px}
 .tgtset{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;color:var(--muted)}
-.tgtset input{width:6.2em;font:inherit;font-size:15px;color:var(--target);background:var(--sky);border:1px solid var(--line);border-radius:4px;padding:8px}
+.tgtset input{width:6.2em;font:inherit;font-size:16px;color:var(--target);background:var(--sky);border:1px solid var(--line);border-radius:4px;padding:8px}
 .tgtset input:focus-visible{outline:2px solid var(--led);outline-offset:1px}
 @media (max-width:560px){.detail{grid-template-columns:1fr}.detail .acts{grid-column:1;grid-row:auto;justify-content:flex-start}}
 .lg-bs{background:#7d5cff}
@@ -106,7 +110,8 @@ button:focus-visible{outline:2px solid var(--led);outline-offset:3px}
 .nameform .btn{padding:9px 14px;font-size:12px}
 .nameform .btn:disabled{opacity:.4}
 .storeyfield{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13px;color:var(--muted)}
-.storeyfield input{flex:none;width:6.5em}
+.storeyfield input{flex:none;width:6.5em;font-size:16px}
+input::placeholder{color:var(--muted);opacity:1}
 .costtext{flex-basis:100%;margin:0;font-family:var(--mono);font-size:13px;color:var(--good)}
 .costtext.short{color:var(--target)}
 .risk{color:var(--target)}
@@ -187,7 +192,16 @@ button:focus-visible{outline:2px solid var(--led);outline-offset:3px}
 .tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .tcard{background:var(--sky-2);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column}
 .tcard.on{border-color:var(--led);box-shadow:0 0 0 1px var(--led)}
+.tcard{cursor:pointer;transition:border-color .15s,transform .15s}
+.tcard:hover{border-color:var(--muted)}
+.tcard.on{cursor:default}
+.tpick{position:relative;display:block;width:100%;padding:0;border:0;background:none;cursor:inherit}
+.tpick:focus-visible{outline:3px solid var(--led);outline-offset:-3px}
 .tcard canvas{display:block;width:100%;height:auto;aspect-ratio:16/10}
+.tcard.locked canvas{filter:saturate(.55) brightness(.8)}
+.tbadge{position:absolute;left:8px;top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:3px 7px;border-radius:999px;background:rgba(10,15,31,.85);color:var(--ink)}
+.tbadge.use{background:var(--led);color:var(--sky);font-weight:600}
+.tbadge.lock{color:var(--window)}
 .tmeta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 8px;padding:8px 10px}
 .tmeta b{font-size:13px;font-weight:600;min-width:0}
 .tmeta .btn{padding:6px 10px;font-size:11px;white-space:nowrap}
@@ -850,7 +864,7 @@ function drawMap(){
     const bc = k % cols, br = Math.floor(k / cols), bx = (R + bc*(4+R))*s, by = (R + br*(4+R))*s;
     c.fillStyle = '#1b2240'; c.beginPath(); c.roundRect(bx, by, 4*s, 4*s, s*.18); c.fill();
     if (selIdx >= 0 && Math.floor(selIdx/PAGE) === k){ c.strokeStyle = 'rgba(255,179,71,.45)'; c.lineWidth = 1.5; c.stroke(); }
-    c.font = `${Math.max(9, Math.min(11, s*.22))}px "Share Tech Mono", monospace`; c.fillStyle = 'rgba(154,164,204,.55)'; c.fillText(`BLOCK ${k + 1}`, bx + 4, by + 4*s - 5);
+    c.font = `${Math.max(9, Math.min(11, s*.22))}px "Share Tech Mono", monospace`; c.fillStyle = '#9aa4cc'; c.fillText(`BLOCK ${k + 1}`, bx + 4, by + 4*s - 5);
     for (let q = 0; q < PAGE; q++){
       const b = all[k*PAGE + q]; if (!b) break;
       const t = b.storeys / omax, lx = bx + ((q%4) + .12)*s, ly = by + (Math.floor(q/4) + .12)*s, lw = .76*s, sh = t*.16*s;
@@ -859,7 +873,8 @@ function drawMap(){
       if (hasBasement(b)){ c.fillStyle = '#7d5cff'; c.fillRect(lx, ly + lw - Math.max(3, lw*.12), lw, Math.max(3, lw*.12)); }
       if (b.storeys >= CRASH_MIN_STOREYS){ c.fillStyle = tok('--target'); c.fillRect(lx, ly, lw, Math.max(2, lw*.08)); }
       if (save.b[b.id]?.rides){ c.fillStyle = tok('--good'); c.beginPath(); c.arc(lx + lw*.82, ly + lw*.82, Math.max(2, lw*.08), 0, Math.PI*2); c.fill(); }
-      c.fillStyle = 'rgba(10,15,31,.7)'; c.font = `${Math.max(8, Math.min(11, lw*.26))}px "Share Tech Mono", monospace`;
+      { const lc = AC.parse(isOwn(b) ? 'rgb(244,207,120)' : mixHex('#3c4a7c', '#9fb2e8', t)); c.fillStyle = AC.ratio([10,15,31], lc) >= AC.ratio([255,255,255], lc) ? '#0a0f1f' : '#ffffff'; }
+      c.font = `${Math.max(8, Math.min(11, lw*.26))}px "Share Tech Mono", monospace`;
       c.fillText(String(k*PAGE + q + 1), lx + 3, ly + Math.max(9, lw*.3));
       if (b.id === selId || b.id === hoverId){ c.strokeStyle = b.id === selId ? tok('--led') : tok('--ink'); c.lineWidth = 2; c.strokeRect(lx - 1, ly - 1, lw + 2, lw + 2); }
       mapHits.push({x: lx, y: ly, w: lw, h: lw, b});
@@ -1373,9 +1388,19 @@ function renderThemes(){
     sec.innerHTML = `<div class="tierhead"><span>${label}</span><span class="label">${tier === 'free' ? 'Free' : `${Math.min(...pr)}–${Math.max(...pr)} coins`}</span></div>`;
     const grid = document.createElement('div'); grid.className = 'tgrid';
     ts.forEach(t => {
-      const card = document.createElement('div'); card.className = 'tcard' + (t.id === save.theme ? ' on' : '');
+      const inUse = t.id === save.theme, have = owned(t);
+      const card = document.createElement('div'); card.className = 'tcard' + (inUse ? ' on' : '') + (have ? '' : ' locked');
       if (!thumbs[t.id]){ const tc = document.createElement('canvas'); tc.width = 480; tc.height = 300; t.draw(tc.getContext('2d'), 480, 300, rng(7)); thumbs[t.id] = tc; }
-      card.append(thumbs[t.id]);
+      // the whole picture is a button: tap it to use the background
+      const pick = document.createElement('button'); pick.type = 'button'; pick.className = 'tpick';
+      pick.setAttribute('aria-label', inUse ? `${t.name}, in use` : have ? `Use ${t.name} background` : `${t.name}, locked, costs ${t.price} coins`);
+      if (inUse) pick.setAttribute('aria-pressed', 'true');
+      pick.append(thumbs[t.id]);
+      const badge = document.createElement('span'); badge.className = 'tbadge' + (inUse ? ' use' : have ? '' : ' lock');
+      badge.textContent = inUse ? 'In use' : have ? 'Tap to use' : `Locked · ${t.price} coins`; pick.append(badge);
+      pick.onclick = () => pickTheme(t);
+      card.append(pick);
+      card.addEventListener('click', e => { if (!e.target.closest('button')) pickTheme(t); });
       const meta = document.createElement('div'); meta.className = 'tmeta'; meta.innerHTML = `<b>${t.name}</b>`;
       let btn;
       if (t.id === save.theme){ btn = mk('In use', 'btn ghost', () => {}); btn.disabled = true; }
@@ -1386,7 +1411,12 @@ function renderThemes(){
     sec.append(grid); list.append(sec);
   });
 }
-function useTheme(t){ save.theme = t.id; persist(); sky(); renderThemes(); }
+function useTheme(t){ save.theme = t.id; persist(); sky(); renderThemes(); $('tToast').textContent = `Using ${t.name}`; }
+function pickTheme(t){
+  if (t.id === save.theme) return;
+  if (owned(t)) return useTheme(t);
+  $('tToast').textContent = save.coins >= t.price ? `${t.name} costs ${t.price} coins. Press Buy to unlock it.` : `${t.name} costs ${t.price} coins. You need ${num(t.price - save.coins)} more.`;
+}
 function buyTheme(t){
   if (save.coins < t.price || owned(t)) return;
   save.coins -= t.price; save.themes.push(t.id);
@@ -1401,9 +1431,117 @@ function sky(){
   cv.width = w*dpr; cv.height = h*dpr; cx.setTransform(dpr,0,0,dpr,0,0); cx.globalAlpha = 1;
   theme().draw(cx, w, h, rng(7));
   cx.fillStyle = 'rgba(8,12,26,.42)'; cx.fillRect(0,0,w,h);
+  if (window.__acReady) scheduleContrast();
 }
 addEventListener('resize', sky); sky();
 if (document.fonts) document.fonts.ready.then(sky);
+// ---------- automatic colour contrast (WCAG 2.2, 1.4.3) ----------
+// Every visible piece of text is measured against what is really behind it: panel colours, see-through
+// overlays and, where text sits straight on the background picture, the picture's own pixels. Text below
+// 4.5:1 (3:1 for large text) is lightened or darkened just enough to pass; if no colour can pass over a
+// busy picture, the text gets a dark backing plate.
+const AC = (() => {
+  const toLin = v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v + .055)/1.055, 2.4); };
+  const lum = c => .2126*toLin(c[0]) + .7152*toLin(c[1]) + .0722*toLin(c[2]);
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+  const over = (top, bot) => { const a = top[3] ?? 1; return [0,1,2].map(i => top[i]*a + bot[i]*(1 - a)); };
+  const mix = (a, b, t) => [0,1,2].map(i => a[i] + (b[i] - a[i])*t);
+  function parse(s){
+    if (!s || s === 'transparent') return null;
+    let m = s.match(/^rgba?\(([^)]+)\)/);
+    if (m){ const p = m[1].split(/[\s,\/]+/).filter(Boolean).map(Number); return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1]; }
+    m = s.match(/^color\(srgb\s+([^)]+)\)/);
+    if (m){ const p = m[1].split(/[\s\/]+/).filter(Boolean).map(Number); return [p[0]*255, p[1]*255, p[2]*255, p.length > 3 ? p[3] : 1]; }
+    return null;
+  }
+  // pick the smallest nudge towards white or black that reaches the target against every sampled background
+  function fix(fg, bgs, target){
+    let best = null;
+    for (const end of [[255,255,255], [0,0,0]]){
+      for (let t = .04; t <= 1.001; t += .04){
+        const c = mix(fg, end, t), worst = Math.min(...bgs.map(b => ratio(c, b)));
+        if (worst >= target + .1){ if (!best || t < best.t) best = {t, c}; break; }
+      }
+    }
+    return best && best.c;
+  }
+  return {lum, ratio, over, mix, parse, fix};
+})();
+const PLATE = [10, 15, 31, .82];
+let acQueued = false, acRunning = false;
+function scheduleContrast(){ if (acQueued) return; acQueued = true; requestAnimationFrame(() => { acQueued = false; runContrast(); }); }
+function bgPixels(){
+  const cv = $('bg'); try { return {d: cx.getImageData(0, 0, cv.width, cv.height).data, w: cv.width, h: cv.height, k: cv.width / innerWidth}; } catch(e){ return null; }
+}
+function sampleRect(px, r){
+  const out = [], xs = 6, ys = 3;
+  for (let i = 0; i < xs; i++) for (let j = 0; j < ys; j++){
+    const x = clamp(Math.floor((r.left + (i + .5)/xs*r.width) * px.k), 0, px.w - 1), y = clamp(Math.floor((r.top + (j + .5)/ys*r.height) * px.k), 0, px.h - 1), o = (y*px.w + x)*4;
+    out.push([px.d[o], px.d[o+1], px.d[o+2]]);
+  }
+  return out;
+}
+function backdrops(el, px){
+  const layers = []; let n = el, op = 1;
+  const app = document.querySelector('.app');
+  while (n && n !== app){
+    const cs = getComputedStyle(n); op *= +cs.opacity;
+    const bg = AC.parse(cs.backgroundColor);
+    if (bg && bg[3] > 0){ layers.push(bg); if (bg[3] >= .99) break; }
+    n = n.parentElement;
+  }
+  let bases;
+  const last = layers[layers.length - 1];
+  if (last && last[3] >= .99) bases = [last.slice(0, 3)], layers.pop();
+  else bases = px ? sampleRect(px, el.getBoundingClientRect()) : [[10,15,31]];
+  const bgs = bases.map(b => layers.slice().reverse().reduce((acc, l) => AC.over(l, acc), b));
+  return {bgs, op};
+}
+function textElements(){
+  const set = new Set();
+  document.querySelectorAll('.app .screen:not([hidden])').forEach(scr => {
+    const w = document.createTreeWalker(scr, NodeFilter.SHOW_TEXT, {acceptNode: t => t.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT});
+    while (w.nextNode()) set.add(w.currentNode.parentElement);
+    scr.querySelectorAll('input').forEach(i => set.add(i));
+  });
+  return [...set].filter(el => {
+    if (el.closest('[hidden]') || el.closest('button:disabled') || el.disabled) return false;
+    const r = el.getBoundingClientRect(); if (!r.width || !r.height || r.bottom < 0 || r.top > innerHeight) return false;
+    const cs = getComputedStyle(el); return cs.visibility !== 'hidden' && cs.display !== 'none';
+  });
+}
+function runContrast(report){
+  if (acRunning) return; acRunning = true;
+  const px = bgPixels(), fails = [];
+  if (report !== 'audit') document.querySelectorAll('[data-ac]').forEach(el => { el.style.removeProperty('color'); el.style.removeProperty('text-shadow'); el.classList.remove('ac-plate'); delete el.dataset.ac; });
+  for (const el of textElements()){
+    const check = () => {
+      const cs = getComputedStyle(el), fg = AC.parse(cs.color); if (!fg) return null;
+      const {bgs, op} = backdrops(el, px), a = (fg[3] ?? 1) * op;
+      const size = parseFloat(cs.fontSize), large = size >= 24 || (size >= 18.66 && +cs.fontWeight >= 700), target = large ? 3 : 4.5;
+      const shown = bgs.map(b => AC.over([fg[0], fg[1], fg[2], a], b)), ratios = bgs.map((b, i) => AC.ratio(shown[i], b)).sort((x, y) => x - y);
+      return {fg, bgs, a, target, worst: ratios[Math.floor(ratios.length * .1)]};
+    };
+    let m = check(); if (!m || m.worst >= m.target) continue;
+    if (report){ fails.push({el, text: (el.value || el.textContent).trim().slice(0, 40), ratio: +m.worst.toFixed(2), target: m.target}); continue; }
+    let c = m.a >= .99 ? AC.fix(m.fg, m.bgs, m.target) : null;
+    if (!c){ el.classList.add('ac-plate'); el.dataset.ac = '1'; m = check(); c = m.worst >= m.target + .1 ? null : (AC.fix(m.fg, m.bgs, m.target) || [255, 255, 255]); }
+    if (c){ el.style.setProperty('color', `rgb(${c.map(Math.round).join(',')})`); if (AC.lum(c) < AC.lum(m.fg)) el.style.setProperty('text-shadow', 'none'); }
+    el.dataset.ac = '1';
+  }
+  acObserver.takeRecords(); acRunning = false;
+  return fails;
+}
+const acObserver = new MutationObserver(recs => {
+  if (acRunning) return;
+  if (recs.some(r => !(r.target.closest && r.target.closest('#reel, .gauge, #stage, .reelwrap')) && !(r.type === 'attributes' && r.attributeName === 'style'))) scheduleContrast();
+});
+acObserver.observe(document.querySelector('.app'), {subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['hidden', 'class', 'aria-selected', 'disabled']});
+let acScrollT = 0;
+document.querySelectorAll('.screen').forEach(s => s.addEventListener('scroll', () => { clearTimeout(acScrollT); acScrollT = setTimeout(scheduleContrast, 120); }, {passive: true}));
+addEventListener('resize', scheduleContrast);
+
+window.__acReady = true; scheduleContrast();
 
 
 renderTitle();
